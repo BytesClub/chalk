@@ -1,3 +1,6 @@
+# Build Files
+[Bb]uild/
+
 # LaTeX files
 *.aux
 *.log

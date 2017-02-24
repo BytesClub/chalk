@@ -1,0 +1,2 @@
+PROJECT( chalk )
+ADD_SUBDIRECTORY( src )
