@@ -1,5 +1,5 @@
 # LaTeX files
-*.aug
+*.aux
 *.log
 *.pdf
 
