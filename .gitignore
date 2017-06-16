@@ -1,5 +1,6 @@
 # Build Files
 [Bb]uild/
+chalk
 
 # LaTeX files
 *.aux
