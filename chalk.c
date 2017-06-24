@@ -1,9 +1,11 @@
 #include <unistd.h>
 #include <stdlib.h>  
-#include <termios.h>
+#include <termios.h> 
+
 struct termios orig_termios;
 
-void disableRawMode(){
+void disableRawMode()
+{
 
 	tcsetattr(STDIN_FILENO,TCSAFLUSH,&orig_termios);
 }
@@ -21,7 +23,6 @@ void enableRawMode()
 int main()
 {
 	enableRawMode();
-
 	char c;
 	while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q');
 	return 0;
