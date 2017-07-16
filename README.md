@@ -13,15 +13,15 @@ An attempt to make a text editor in C
 
 ### Documentation
 
-To build the Documentation, on `/Docs`, run: 
+To build the Documentation, on `/docs`, run: 
 
 ```
-make pdfdocs
+make latexpdf
 ```
 
 or
 
 ```
-make htmldocs
+make html
 ```
 
