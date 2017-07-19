@@ -1,3 +1,5 @@
+/* includes */
+
 #include <unistd.h>
 #include <stdlib.h>  
 #include <termios.h> 
@@ -5,7 +7,11 @@
 #include <ctype.h>
 #include <errno.h>
 
+/* data */
+
 struct termios orig_termios;
+
+/* terminal */
 
 void die(const char *S ) 
 {
@@ -33,12 +39,14 @@ void enableRawMode()
         raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
         raw.c_cflag |= (CS8);
         raw.c_cc[VMIN] = 0; /* Return each byte, or 0 on timeout */
-        raw.c_cc[VTIME] = 1; /* 100 ms timeout */
+        raw.c_cc[VTIME] = 1; /* 100 ms timeout for read() */
 
         if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) {
                 die("tcsetattr");
         }
 }
+
+/* init */
 
 int main()
 {
