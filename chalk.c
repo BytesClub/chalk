@@ -37,7 +37,7 @@ void enableRawMode()
         }
         atexit(disableRawMode);
 
-        struct termios raw=orig_termios; 
+        struct termios raw = orig_termios; 
         raw.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
         raw.c_oflag &= ~(OPOST);
         raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
