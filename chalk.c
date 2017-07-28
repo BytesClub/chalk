@@ -6,16 +6,35 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
+#include <sys/ioctl.h>
 
 /* defines */
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 /* data */
+struct editorConfi {
+        struct termios orig_termios;
+        int screenrows;
+        int screencols;
+};
 
-struct termios orig_termios;
+struct editorConfi E;
 
 /* terminal */
+
+int getWindowSize(int *row,int *col)
+{
+        struct winsize ws;
+
+        if( ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 && ws.ws_col == 0) {
+                return -1;
+        } else {
+                *row = ws.ws_row;
+                *col = ws.ws_col;
+                return 0;
+       }
+}
 
 void die(const char *S ) 
 {
@@ -27,19 +46,19 @@ void die(const char *S )
 
 void disableRawMode()
 {
-        if(tcsetattr(STDIN_FILENO,TCSAFLUSH,&orig_termios) == -1) {
+        if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.orig_termios) == -1) {
                 die("tcsetattr");
         }
 }
 
 void enableRawMode()
 {
-        if(tcgetattr(STDIN_FILENO, &orig_termios) == -1) {
+        if(tcgetattr(STDIN_FILENO, &E.orig_termios) == -1) {
                 die("tcgetattr");
         }
         atexit(disableRawMode);
 
-        struct termios raw = orig_termios; 
+        struct termios raw = E.orig_termios;
         raw.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
         raw.c_oflag &= ~(OPOST);
         raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
@@ -68,8 +87,11 @@ char editorReadKey()
 void drawRows()
 {
         int i;
-        for(i = 0; i < 24; i++) {
-                write(STDOUT_FILENO, "~\r\n", 3);
+        for(i = 0; i < E.screenrows; i++) {
+                write(STDOUT_FILENO, "~", 1);
+                if(i < E.screenrows - 1) {
+                        write(STDOUT_FILENO, "\r\n", 2);
+                }
         }
 }
 
@@ -100,9 +122,17 @@ void editorProcessKeypress()
 
 /* init */
 
+void initEditor()
+{
+        if(getWindowSize(&E.screenrows,&E.screencols) == -1) {
+                die("getWindowSize");
+        }
+}
+
 int main()
 {
         enableRawMode();
+        initEditor();
 
         while(1) {
                 editorRefreshScreen();
