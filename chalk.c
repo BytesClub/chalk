@@ -5,6 +5,7 @@
 #include <termios.h> 
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include <errno.h>
 #include <sys/ioctl.h>
 
@@ -20,6 +21,29 @@ struct editorConfi {
 };
 
 struct editorConfi E;
+
+/* append buffer */
+
+struct abuf {
+        char *s;
+        int len;
+};
+
+#define ABUF_INIT {NULL, 0}
+
+void append( struct abuf *ab, char *C, int l)
+{
+        char *new = realloc(ab->s, ab->len +l);
+        if(new == NULL) return;
+        memcpy(&new[ab->len], C, l);
+        ab->s = new;
+        ab->len += l;
+}
+
+void freebuf(struct abuf *ab)
+{
+        free(ab->s);
+}
 
 /* terminal */
 
@@ -84,25 +108,30 @@ char editorReadKey()
 
 /* output */
 
-void drawRows()
+void drawRows(struct abuf *ab)
 {
         int i;
         for(i = 0; i < E.screenrows; i++) {
-                write(STDOUT_FILENO, "~", 1);
+                append(ab,"~",1);
                 if(i < E.screenrows - 1) {
-                        write(STDOUT_FILENO, "\r\n", 2);
+                        append(ab, "\r\n",2);
                 }
         }
 }
 
 void editorRefreshScreen()
 {
-        write(STDOUT_FILENO, "\x1b[2J", 4);
-        write(STDOUT_FILENO, "\x1b[H", 3);
+        struct abuf ab = ABUF_INIT;
 
-        drawRows();
+        append(&ab, "\x1b[2J",4);
+        append(&ab, "\x1b[H",3);
 
-        write(STDOUT_FILENO, "\x1b[H", 3);
+        drawRows(&ab);
+
+        append(&ab, "\x1b[H",3);
+        write(STDOUT_FILENO,ab.s,ab.len);
+
+        freebuf(&ab);
 }
 
 /* input */
