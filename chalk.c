@@ -33,7 +33,7 @@ struct abuf {
 
 void append( struct abuf *ab, char *C, int l)
 {
-        char *new = realloc(ab->s, ab->len +l);
+        char *new = realloc(ab->s, ab->len + l);
         if(new == NULL) return;
         memcpy(&new[ab->len], C, l);
         ab->s = new;
@@ -112,9 +112,11 @@ void drawRows(struct abuf *ab)
 {
         int i;
         for(i = 0; i < E.screenrows; i++) {
-                append(ab,"~",1);
+                append(ab, "~", 1);
+
+                append(ab, "\x1b[K", 3);
                 if(i < E.screenrows - 1) {
-                        append(ab, "\r\n",2);
+                        append(ab, "\r\n", 2);
                 }
         }
 }
@@ -122,14 +124,14 @@ void drawRows(struct abuf *ab)
 void editorRefreshScreen()
 {
         struct abuf ab = ABUF_INIT;
-
-        append(&ab, "\x1b[2J",4);
-        append(&ab, "\x1b[H",3);
+        append(&ab, "\x1b[?25l", 6); /* Hide the cursor before refresh */
+        append(&ab, "\x1b[H", 3);
 
         drawRows(&ab);
 
-        append(&ab, "\x1b[H",3);
-        write(STDOUT_FILENO,ab.s,ab.len);
+        append(&ab, "\x1b[H", 3);
+        append(&ab, "\x1b[?25h", 6); /* Show cursor after refresh */
+        write(STDOUT_FILENO, ab.s, ab.len);
 
         freebuf(&ab);
 }
