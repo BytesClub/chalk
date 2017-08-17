@@ -12,6 +12,7 @@
 /* defines */
 
 #define CTRL_KEY(k) ((k) & 0x1f)
+#define ABUF_INIT {NULL, 0}
 
 /* data */
 struct editorConfi {
@@ -28,8 +29,6 @@ struct abuf {
         char *s;
         int len;
 };
-
-#define ABUF_INIT {NULL, 0}
 
 void append( struct abuf *ab, char *C, int l)
 {
@@ -110,8 +109,8 @@ char editorReadKey()
 
 void drawRows(struct abuf *ab)
 {
-        int i;
-        for(i = 0; i < E.screenrows; i++) {
+        int y;
+        for(y = 0; y < E.screenrows; y++) {
                 append(ab, "~", 1);
 
                 append(ab, "\x1b[K", 3);
