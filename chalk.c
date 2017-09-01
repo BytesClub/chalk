@@ -13,11 +13,24 @@
 
 #define CHALK_VERSION "0.0.1"
 
+enum moveKey {
+        Left_Arrow = 1000,
+        Right_Arrow,
+        Up_Arrow,
+        Down_Arrow,
+        Page_Up,
+        Page_Down,
+        Home_Key,
+        End_Key,
+        Delete_Key
+};
+
 #define CTRL_KEY(k) ((k) & 0x1f)
 #define ABUF_INIT {NULL, 0}
 
 /* data */
 struct editorConfi {
+        int cx, cy;
         struct termios orig_termios;
         int screenrows;
         int screencols;
@@ -32,7 +45,7 @@ struct abuf {
         int len;
 };
 
-void append( struct abuf *ab, char *C, int l)
+void append(struct abuf *ab, char *C, int l)
 {
         char *new = realloc(ab->s, ab->len + l);
         if(new == NULL) return;
@@ -96,13 +109,70 @@ void enableRawMode()
         }
 }
 
-char editorReadKey()
+int editorReadKey()
 {
         int nread;
         char c;
         while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
                 if (nread == -1 && errno != EAGAIN)
                         die("read");
+        }
+        if(c == '\x1b') {
+                char buf [4];
+                if(read(STDIN_FILENO, &buf[0], 1) == -1) {
+                        return c;
+                }
+                if(read(STDIN_FILENO, &buf[1], 1) == -1) {
+                        return c;
+                }
+                if( buf[0] == '[') {
+                        if( buf[1] <= '9' && buf[1] >= '0') {
+                                if(read(STDIN_FILENO, &buf[2], 1) == -1) {
+                                        return c;
+                                }
+                                if( buf[2] == '~') {
+                                        switch(buf[1]) {
+                                                case '1' :
+                                                        return Home_Key;
+                                                case '3' :
+                                                        return Delete_Key;
+                                                case '4' :
+                                                        return End_Key;
+                                                case '5' :
+                                                        return Page_Up;
+                                                case '6' :
+                                                        return Page_Down;
+                                                case '7' :
+                                                        return Home_Key;
+                                                case '8' :
+                                                        return End_Key;
+                                        }
+                                }
+                        } else {
+			        switch (buf[1]) {
+                                case 'A' :
+                                        return Up_Arrow;
+                                case 'B' :
+                                        return Down_Arrow;
+                                case 'C' :
+                                        return Right_Arrow;
+                                case 'D' :
+                                        return Left_Arrow;
+                                case 'H' :
+                                        return Home_Key;
+                                case 'F' :
+                                        return End_Key;
+                                }
+                        }
+                } else if ( buf[0] == 'O') {
+                        switch(buf[1]) {
+                                case 'H' :
+                                        return Home_Key;
+                                case 'F' :
+                                        return End_Key;
+                        }
+                }
+                return c;
         }
         return c;
 }
@@ -180,7 +250,10 @@ void editorRefreshScreen()
 
         drawRows(&ab);
 
-        append(&ab, "\x1b[H", 3);
+        char buf[32];
+        snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1);
+        append(&ab, buf, strlen(buf));
+
         append(&ab, "\x1b[?25h", 6); /* Show cursor after refresh */
         write(STDOUT_FILENO, ab.s, ab.len);
 
@@ -189,9 +262,35 @@ void editorRefreshScreen()
 
 /* input */
 
+void moveCursor(int key)
+{
+        switch(key) {
+                case Left_Arrow :
+                        if(E.cx != 0) {
+                                E.cx--;
+                        }
+                        break;
+                case Right_Arrow :
+                        if(E.cx != (E.screencols - 1)) {
+                                E.cx++;
+                        }
+                        break;
+                case Up_Arrow :
+                        if(E.cy != 0) {
+                                E.cy--;
+                        }
+                        break;
+                case Down_Arrow :
+                        if(E.cy != (E.screenrows - 1)) {
+                                E.cy++;
+                        }
+                        break;
+        }
+}
+
 void editorProcessKeypress()
 {
-        char c = editorReadKey();
+        int c = editorReadKey();
 
         switch(c) {
                 case CTRL_KEY('q'): 
@@ -199,6 +298,26 @@ void editorProcessKeypress()
                         write(STDOUT_FILENO, "\x1b[H", 3);
                         exit(0);
                         break;
+                case Page_Up :
+                case Page_Down :
+                {
+                        int pwc = E.screenrows;
+                        while(pwc--) {
+                                moveCursor(c == Page_Up ? Up_Arrow : Down_Arrow);
+                        }
+                }
+                case Home_Key :
+                        E.cx = 0;
+                        break;
+                case End_Key :
+                        E.cx = (E.screencols - 1);
+                        break;
+                case Left_Arrow :
+                case Up_Arrow :
+                case Down_Arrow :
+                case Right_Arrow :
+                         moveCursor(c);
+                         break;
         }
 }
 
@@ -206,6 +325,7 @@ void editorProcessKeypress()
 
 void initEditor()
 {
+        E.cx = 0, E.cy = 0;
         if(getWindowSize(&E.screenrows,&E.screencols) == -1) {
                 die("getWindowSize");
         }
