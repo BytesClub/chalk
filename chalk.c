@@ -1,4 +1,7 @@
 /* includes */
+#define _DEFAULT_SOURCE
+#define _BSD_SOURCE
+#define _GNU_SOURCE
 
 #include <unistd.h>
 #include <stdlib.h>  
@@ -7,6 +10,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
 #include <sys/ioctl.h>
 
 /* defines */
@@ -29,11 +33,19 @@ enum moveKey {
 #define ABUF_INIT {NULL, 0}
 
 /* data */
+
+typedef struct erow {
+        int len;
+        char *data;
+} erow;
+
 struct editorConfi {
         int cx, cy;
         struct termios orig_termios;
         int screenrows;
         int screencols;
+	int no_row;
+	erow *row;
 };
 
 struct editorConfi E;
@@ -177,63 +189,111 @@ int editorReadKey()
         return c;
 }
 
+/* row operations */
+
+void appendrow(char *c, int l)
+{
+        E.row = realloc(E.row, sizeof(erow) * (E.no_row + 1));
+
+        int in = E.no_row;
+        E.row[in].len = l;
+        E.row[in].data = malloc(l + 1);
+        memcpy(E.row[in].data, c, l);
+        E.row[in].data[l] = '\0';
+        E.no_row++;
+}
+
+/* file i/o */
+
+void openEditor(char *fname)
+{
+        FILE *f = fopen(fname,"r");
+        if(!f) {
+                die("fopen");
+        }
+        char *val = NULL;
+        size_t linecap = 0;
+        ssize_t linelen;
+       // linelen = getline(&val, &linecap, f);
+        while((linelen = getline(&val, &linecap, f)) != -1) {
+                while (linelen > 0 && (val[linelen - 1] == '\n' || val[linelen - 1] == '\r'))
+                        linelen--;
+
+                appendrow(val, linelen);
+        }
+        free(val);
+        fclose(f);
+}
+
 /* output */
 
 void drawRows(struct abuf *ab)
 {
         int y;
         for(y = 0; y < E.screenrows; y++) {
-                if (y == E.screenrows / 3) {
-                        char welcome[80];
-                        int welcomelen = snprintf(welcome, sizeof(welcome), "Chalk editor --version %s", CHALK_VERSION);
+                if(y >= E.no_row) {
+                        if(E.no_row == 0) {
+                                if (y == E.screenrows / 3) {
+                                        char welcome[80];
+                                        int welcomelen = snprintf(welcome, sizeof(welcome), "Chalk editor --version %s", CHALK_VERSION);
 
-                        if (welcomelen > E.screencols)
-                                welcomelen = E.screencols;
+                                        if (welcomelen > E.screencols)
+                                                welcomelen = E.screencols;
 
-                        int padding = (E.screencols - welcomelen) / 2;
-                        if (padding) {
+                                        int padding = (E.screencols - welcomelen) / 2;
+                                        if (padding) {
+                                                append(ab, "~", 1);
+                                                padding--;
+                                        }
+
+                                        while (padding--)
+                                                append(ab, " ", 1);
+                                        append(ab, welcome, welcomelen);
+                                } else if (y == (E.screenrows / 3) + 1) {
+                                        char welcome[80];
+                                        int welcomelen = snprintf(welcome, sizeof(welcome), "by Rudra Nil Basu and Satyam Kumar");
+
+                                        if (welcomelen > E.screencols)
+                                                welcomelen = E.screencols;
+
+                                        int padding = (E.screencols - welcomelen) / 2;
+                                        if (padding) {
+                                                append(ab, "~", 1);
+                                                padding--;
+                                        }
+
+                                        while (padding--)
+                                                append(ab, " ", 1);
+                                        append(ab, welcome, welcomelen);
+                                } else if (y == (E.screenrows / 3) + 4) {
+                                        char welcome[80];
+                                        int welcomelen = snprintf(welcome, sizeof(welcome), "Bytes Club");
+
+                                        if (welcomelen > E.screencols)
+                                                welcomelen = E.screencols;
+
+                                        int padding = (E.screencols - welcomelen) / 2;
+                                        if (padding) {
+                                                append(ab, "~", 1);
+                                                padding--;
+                                        }
+
+                                        while (padding--)
+                                                append(ab, " ", 1);
+                                        append(ab, welcome, welcomelen);
+                                } else {
+                                        append(ab, "~", 1);
+                                }
+                        } else {
                                 append(ab, "~", 1);
-                                padding--;
                         }
-
-                        while (padding--)
-                                append(ab, " ", 1);
-                        append(ab, welcome, welcomelen);
-                } else if (y == (E.screenrows / 3) + 1) {
-                        char welcome[80];
-                        int welcomelen = snprintf(welcome, sizeof(welcome), "by Rudra Nil Basu and others");
-
-                        if (welcomelen > E.screencols)
-                                welcomelen = E.screencols;
-
-                        int padding = (E.screencols - welcomelen) / 2;
-                        if (padding) {
-                                append(ab, "~", 1);
-                                padding--;
-                        }
-
-                        while (padding--)
-                                append(ab, " ", 1);
-                        append(ab, welcome, welcomelen);
-                } else if (y == (E.screenrows / 3) + 4) {
-                        char welcome[80];
-                        int welcomelen = snprintf(welcome, sizeof(welcome), "Bytes Club");
-
-                        if (welcomelen > E.screencols)
-                                welcomelen = E.screencols;
-
-                        int padding = (E.screencols - welcomelen) / 2;
-                        if (padding) {
-                                append(ab, "~", 1);
-                                padding--;
-                        }
-
-                        while (padding--)
-                                append(ab, " ", 1);
-                        append(ab, welcome, welcomelen);
                 } else {
-                        append(ab, "~", 1);
-                }
+		int len = E.row[y].len;
+		if(len > E.screencols ) {
+			len = E.screencols;
+		}
+		append(ab, E.row[y].data, len);
+	}
 
                 append(ab, "\x1b[K", 3);
                 if(y < E.screenrows - 1) {
@@ -325,16 +385,19 @@ void editorProcessKeypress()
 
 void initEditor()
 {
-        E.cx = 0, E.cy = 0;
+        E.cx = 0, E.cy = 0, E.no_row = 0, E.row = NULL;
         if(getWindowSize(&E.screenrows,&E.screencols) == -1) {
                 die("getWindowSize");
         }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
         enableRawMode();
         initEditor();
+        if (argc >= 2) {
+                openEditor(argv[1]);
+        }
 
         while(1) {
                 editorRefreshScreen();
