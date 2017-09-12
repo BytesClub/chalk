@@ -1,10 +1,17 @@
-.. Chalk: A Command Line Text Editor documentation master file, created by
-   sphinx-quickstart on Sun Jul 16 12:47:10 2017.
+.. Chalk documentation master file, created by
+   sphinx-quickstart on Wed Sep  6 23:49:05 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Chalk: A Command Line Text Editor's documentation
-=============================================================
+Welcome to Chalk's documentation!
+=================================
+
+Contents:
+
+This is introduction to Chalk.
+Chalk is mainly a command line text editor developed by Bytes Club 
+under the mentorship of Rudra Nil Basu.
+Here we are going to discuss the basic git features .
 
 .. toctree::
    :maxdepth: 2
@@ -28,3 +35,4 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
