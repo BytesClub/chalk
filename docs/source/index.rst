@@ -3,15 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Chalk's documentation!
+Chalk
 =================================
 
-Contents:
-
-This is introduction to Chalk.
-Chalk is mainly a command line text editor developed by Bytes Club 
-under the mentorship of Rudra Nil Basu.
-Here we are going to discuss the basic git features .
+Chalk is a command line text editor developed by Bytes Club
 
 .. toctree::
    :maxdepth: 2
@@ -25,14 +20,8 @@ Here we are going to discuss the basic git features .
 .. toctree::
    :maxdepth: 2
 
+   install
    getting_started
    setting_up
    sending_patches
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
