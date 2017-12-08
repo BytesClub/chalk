@@ -8,6 +8,9 @@ Chalk
 
 Chalk is a command line text editor developed by Bytes Club
 
+.. figure:: images/chalk_banner.png
+   :align:  center
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -15,7 +18,7 @@ Chalk is a command line text editor developed by Bytes Club
 .. toctree::
    :maxdepth: 2
 
-   install
+   howto
    getting_started
    setting_up
    sending_patches

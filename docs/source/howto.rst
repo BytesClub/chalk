@@ -1,5 +1,5 @@
 ================
-Install
+HOWTO
 ================
 
 Pre-requisites

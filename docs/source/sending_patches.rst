@@ -6,11 +6,11 @@ After making the changes in the source code follow the following steps.
 
 	.. code-block:: console
 
-		$ git add .
+		$ git add <files>
 
 	.. code-block:: console
 
-		$ git commit --signoff 
+		$ git commit --signoff -v
 
 	- add the commit message
 
