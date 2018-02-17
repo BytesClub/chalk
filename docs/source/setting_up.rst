@@ -6,23 +6,23 @@ Set up git-email
 -------------------
 - Enable IMAP and POP
 
- 	- Open your mail in a browser.
+	- Open your mail in a browser.
 	- Go to the settings > Forwarding > POP/IMAP.
 	- Enable IMAP and POP.
 
 - Set up your terminal.
-	
+
 	.. code-block:: console
-	
+
 		$ git config --global sendemail.from "YOUR NAME <user@example.org>"
 
 	.. code-block:: console
 
 		$ git config --global sendemail.smtpserver imap.example.org
-	
+
 	- imap.example.org will be smtp.googlemail.com for gmail
 
-	.. code-block:: console	
+	.. code-block:: console
 
 		$ git config --global sendemail.smtpuser USER
 
@@ -40,7 +40,7 @@ Set up git-email
 
 	.. code-block:: console
 
-		$ vi ~/.gitconfig 
+		$ vi ~/.gitconfig
 
 	- ( It will open a new file)
 	- if not available add :-
@@ -51,15 +51,12 @@ Set up  vimrc
 -------------------
 
 	.. code-block:: console
-		
+
 		$ vim ~/.vimrc
 
 	- It will open a new file, add below given statements to that file:-
 		- set tabstop=8
 		- set shiftwidth=8
 		- set expandtab
-
-
-	
-		
+                - match ExtraWhitespace /\s\+$\| \+\ze\t/" Show trailing whitespace and spaces before a tab:
 
