@@ -4,8 +4,8 @@
 #define _GNU_SOURCE
 
 #include <unistd.h>
-#include <stdlib.h>  
-#include <termios.h> 
+#include <stdlib.h>
+#include <termios.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -86,7 +86,7 @@ int getWindowSize(int *row,int *col)
        }
 }
 
-void die(const char *S ) 
+void die(const char *S )
 {
         perror(S);
         write(STDOUT_FILENO, "\x1b[2J", 4);
@@ -353,7 +353,7 @@ void editorProcessKeypress()
         int c = editorReadKey();
 
         switch(c) {
-                case CTRL_KEY('q'): 
+                case CTRL_KEY('q'):
                         write(STDOUT_FILENO, "\x1b[2J", 4);
                         write(STDOUT_FILENO, "\x1b[H", 3);
                         exit(0);
