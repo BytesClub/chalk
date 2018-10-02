@@ -115,8 +115,4 @@ void editorRefreshScreen(void);
 void moveCursor(int);
 void editorProcessKeypress(void);
 
-// Init Process
-void initEditor(void);
-
-
 #endif

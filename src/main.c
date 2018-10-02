@@ -1,3 +1,8 @@
+/**
+ * main.c
+ * Initialize editor and starts process
+ */
+
 /* includes */
 #include <chalk.h>
 
@@ -5,7 +10,6 @@
 struct editorConfi E;
 
 /* init */
-
 void initEditor()
 {
         E.cx = 0, E.cy = 0, E.no_row = 0, E.row = NULL;
@@ -14,6 +18,7 @@ void initEditor()
         }
 }
 
+/* main function */
 int main(int argc, char *argv[])
 {
         enableRawMode();
