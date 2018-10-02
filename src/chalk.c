@@ -1,61 +1,8 @@
 /* includes */
-#define _DEFAULT_SOURCE
-#define _BSD_SOURCE
-#define _GNU_SOURCE
+#include <chalk.h>
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <termios.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/ioctl.h>
-
-/* defines */
-
-#define CHALK_VERSION "0.0.1"
-
-enum moveKey {
-        Left_Arrow = 1000,
-        Right_Arrow,
-        Up_Arrow,
-        Down_Arrow,
-        Page_Up,
-        Page_Down,
-        Home_Key,
-        End_Key,
-        Delete_Key
-};
-
-#define CTRL_KEY(k) ((k) & 0x1f)
-#define ABUF_INIT {NULL, 0}
-
-/* data */
-
-typedef struct erow {
-        int len;
-        char *data;
-} erow;
-
-struct editorConfi {
-        int cx, cy;
-        struct termios orig_termios;
-        int screenrows;
-        int screencols;
-	int no_row;
-	erow *row;
-};
-
+/* Editor Config Variable */
 struct editorConfi E;
-
-/* append buffer */
-
-struct abuf {
-        char *s;
-        int len;
-};
 
 void append(struct abuf *ab, char *C, int l)
 {
