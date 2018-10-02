@@ -1,6 +1,6 @@
 /**
  * buffer.c
- * Method related to buffer storage
+ * Functions related to buffer storage
  */
 
 // include base header
