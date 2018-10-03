@@ -102,7 +102,7 @@ void enableRawMode(void);
 int editorReadKey(void);
 
 // Row Operation
-void appendrow(char*, int);
+void appendRow(char*, int);
 
 // File I/O
 void openEditor(char*);

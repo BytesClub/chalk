@@ -1,9 +1,9 @@
 #################################
-# Makefile						#
+# Makefile                      #
 # Build Recipie for Executable  #
-#								#
+#                               #
 # Author: Progyan Bhattacharya  #
-# Maintainer: Bytes Club		#
+# Maintainer: Bytes Club        #
 #################################
 
 # Define Compiler

@@ -10,7 +10,7 @@
 extern struct editorConfi E;
 
 // row operations
-void appendrow(char *c, int l)
+void appendRow(char *c, int l)
 {
         E.row = realloc(E.row, sizeof(erow) * (E.no_row + 1));
 
@@ -37,7 +37,7 @@ void openEditor(char *fname)
                 while (linelen > 0 && (val[linelen - 1] == '\n' || val[linelen - 1] == '\r'))
                         linelen--;
 
-                appendrow(val, linelen);
+                appendRow(val, linelen);
         }
         free(val);
         fclose(f);
